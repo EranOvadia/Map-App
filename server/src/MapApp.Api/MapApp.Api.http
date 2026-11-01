@@ -1,6 +1,36 @@
-@MapApp.Api_HostAddress = http://localhost:5110
+@host = http://localhost:5110
 
-GET {{MapApp.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+### Get all polygons
+GET {{host}}/api/polygons
 
-###
+### Create a polygon (GeoJSON, [lon, lat])
+POST {{host}}/api/polygons
+Content-Type: application/json
+
+{
+  "name": "Test polygon",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [[[34.78, 32.08], [34.80, 32.08], [34.79, 32.10]]]
+  }
+}
+
+### Delete all polygons
+DELETE {{host}}/api/polygons
+
+### Get all objects
+GET {{host}}/api/objects
+
+### Save a list of objects
+POST {{host}}/api/objects
+Content-Type: application/json
+
+{
+  "objects": [
+    { "type": "Marker", "geometry": { "type": "Point", "coordinates": [34.78, 32.08] } },
+    { "type": "Symbol", "symbol": "star", "geometry": { "type": "Point", "coordinates": [34.79, 32.09] } }
+  ]
+}
+
+### Delete selected objects
+DELETE {{host}}/api/objects?ids=000000000000000000000000
