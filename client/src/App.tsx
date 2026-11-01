@@ -1,5 +1,5 @@
-import { Panel } from './components/layout/Panel'
 import { StatusBar } from './components/layout/StatusBar'
+import { MapDataPanel } from './components/mapData/MapDataPanel'
 import { MapView } from './components/map/MapView'
 import { ObjectsPanel } from './components/objects/ObjectsPanel'
 import { PolygonPanel } from './components/polygons/PolygonPanel'
@@ -21,9 +21,7 @@ function App() {
           <aside className="app__sidebar">
             <PolygonPanel />
             <ObjectsPanel />
-            <Panel title="Map Data" className="panel--map-data">
-              <p className="muted">Saved data</p>
-            </Panel>
+            <MapDataPanel />
           </aside>
         </main>
       </div>
