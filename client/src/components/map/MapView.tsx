@@ -4,6 +4,7 @@ import { useMapContext } from '../../state/MapContext'
 import { DrawingLayer } from './DrawingLayer'
 import { FocusController } from './FocusController'
 import { MapClickHandler } from './MapClickHandler'
+import { ObjectsLayer } from './ObjectsLayer'
 import { PolygonLayer } from './PolygonLayer'
 
 const DEFAULT_CENTER: LatLngTuple = [32.0853, 34.7818]
@@ -25,6 +26,7 @@ export function MapView() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <PolygonLayer />
+        <ObjectsLayer />
         <DrawingLayer />
         <MapClickHandler />
         <FocusController />
