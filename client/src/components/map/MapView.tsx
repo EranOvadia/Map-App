@@ -1,7 +1,10 @@
 import { MapContainer, TileLayer } from 'react-leaflet'
 import type { LatLngTuple } from 'leaflet'
 import { useMapContext } from '../../state/MapContext'
+import { DrawingLayer } from './DrawingLayer'
 import { FocusController } from './FocusController'
+import { MapClickHandler } from './MapClickHandler'
+import { PolygonLayer } from './PolygonLayer'
 
 const DEFAULT_CENTER: LatLngTuple = [32.0853, 34.7818]
 const DEFAULT_ZOOM = 13
@@ -21,6 +24,9 @@ export function MapView() {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        <PolygonLayer />
+        <DrawingLayer />
+        <MapClickHandler />
         <FocusController />
       </MapContainer>
       {MODE_HINTS[mode] && <div className="map-view__hint">{MODE_HINTS[mode]}</div>}

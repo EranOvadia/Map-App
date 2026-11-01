@@ -1,6 +1,7 @@
 import { Panel } from './components/layout/Panel'
 import { StatusBar } from './components/layout/StatusBar'
 import { MapView } from './components/map/MapView'
+import { PolygonPanel } from './components/polygons/PolygonPanel'
 import { MapProvider } from './state/MapContext'
 import './App.css'
 
@@ -17,9 +18,7 @@ function App() {
             <MapView />
           </div>
           <aside className="app__sidebar">
-            <Panel title="Polygon" className="panel--polygons">
-              <p className="muted">Polygon management</p>
-            </Panel>
+            <PolygonPanel />
             <Panel title="Objects" className="panel--objects">
               <p className="muted">Object management</p>
             </Panel>

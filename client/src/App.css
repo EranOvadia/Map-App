@@ -211,6 +211,11 @@
   width: 100%;
 }
 
+/* Selection is shown by stroke colour; hide the browser's focus box around SVG paths. */
+.map-view path.leaflet-interactive:focus {
+  outline: none;
+}
+
 .map-view--drawPolygon .leaflet-container,
 .map-view--addObject .leaflet-container {
   cursor: crosshair;
