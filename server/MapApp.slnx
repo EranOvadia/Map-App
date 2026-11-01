@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MapApp.Api/MapApp.Api.csproj" />
+    <Project Path="src/MapApp.BLL/MapApp.BLL.csproj" />
+    <Project Path="src/MapApp.DAL/MapApp.DAL.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/MapApp.Tests/MapApp.Tests.csproj" />
+  </Folder>
+</Solution>
