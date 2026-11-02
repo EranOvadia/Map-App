@@ -3,6 +3,7 @@ import { Polygon, Tooltip } from 'react-leaflet'
 import { useMapContext } from '../../state/MapContext'
 import type { MapPolygon } from '../../types/polygon'
 import { toLatLngs } from '../../utils/geoConvert'
+import { displayName } from '../../utils/names'
 
 function styleFor(polygon: MapPolygon, selected: boolean): PathOptions {
   if (selected) return { color: '#dc2626', weight: 4, fillOpacity: 0.3 }
@@ -30,7 +31,7 @@ export function PolygonLayer() {
             }}
           >
             <Tooltip sticky>
-              {polygon.name}
+              {displayName(polygon.name, 'Unnamed polygon')}
               {!polygon.isSaved && ' (unsaved)'}
             </Tooltip>
           </Polygon>

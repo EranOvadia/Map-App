@@ -3,6 +3,7 @@ import { errorMessage } from '../api/httpClient'
 import { objectsApi } from '../api/objectsApi'
 import { useMapContext } from '../state/MapContext'
 import type { MapObjectDto, MapObjectItem } from '../types/mapObject'
+import { nameForApi } from '../utils/names'
 
 const fromDto = (dto: MapObjectDto): MapObjectItem => ({
   id: dto.id,
@@ -43,6 +44,7 @@ export function useMapObjects() {
     try {
       const saved = await objectsApi.saveMany(
         unsaved.map((o) => ({
+          name: nameForApi(o.name),
           type: o.type,
           symbol: o.symbol,
           geometry: { type: 'Point', coordinates: o.position },

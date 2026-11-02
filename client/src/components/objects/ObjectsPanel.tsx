@@ -1,6 +1,8 @@
 import { useEffect } from 'react'
 import { useMapObjects } from '../../hooks/useMapObjects'
 import { useMapContext } from '../../state/MapContext'
+import { STATE_COLORS, shapeSvg } from '../../utils/symbols'
+import { UnsavedNameList } from '../common/UnsavedNameList'
 import { Panel } from '../layout/Panel'
 import { SymbolPicker } from './SymbolPicker'
 
@@ -52,6 +54,24 @@ export function ObjectsPanel() {
           Delete selected
         </button>
       </div>
+      <UnsavedNameList
+        items={state.objects
+          .filter((o) => !o.isSaved)
+          .map((o) => ({
+            id: o.id,
+            name: o.name,
+            icon: (
+              <span
+                // Static SVG generated from constants in utils/symbols.
+                dangerouslySetInnerHTML={{ __html: shapeSvg(o.type, o.symbol, STATE_COLORS.unsaved, 16) }}
+              />
+            ),
+          }))}
+        placeholder="Object name (optional)"
+        disabled={objects.busy}
+        onRename={(id, name) => dispatch({ type: 'RENAME_OBJECT', id, name })}
+        onDiscard={(id) => dispatch({ type: 'REMOVE_OBJECTS', ids: [id] })}
+      />
       <p className="muted">
         {isAdding
           ? 'Click on the map to place the selected object type.'

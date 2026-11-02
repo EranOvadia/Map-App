@@ -4,6 +4,7 @@ import { polygonsApi } from '../api/polygonsApi'
 import { useMapContext } from '../state/MapContext'
 import type { MapPolygon, PolygonDto } from '../types/polygon'
 import { closeRing, openRing } from '../utils/geoConvert'
+import { nameForApi } from '../utils/names'
 
 const fromDto = (dto: PolygonDto): MapPolygon => ({
   id: dto.id,
@@ -42,7 +43,10 @@ export function usePolygons() {
     try {
       // One POST per polygon; stop at the first failure so the rest stay on the map unsaved.
       for (const polygon of unsaved) {
-        await polygonsApi.create({ geometry: { type: 'Polygon', coordinates: [closeRing(polygon.ring)] } })
+        await polygonsApi.create({
+          name: nameForApi(polygon.name),
+          geometry: { type: 'Polygon', coordinates: [closeRing(polygon.ring)] },
+        })
         dispatch({ type: 'REMOVE_POLYGONS', ids: [polygon.id] })
         savedCount++
       }

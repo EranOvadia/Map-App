@@ -58,10 +58,10 @@ export function mapReducer(state: MapState, action: MapAction): MapState {
 
     case 'COMPLETE_DRAFT': {
       if (state.draftVertices.length < 3) return state
-      const unsavedCount = state.polygons.filter((p) => !p.isSaved).length
       const polygon: MapPolygon = {
         id: nextTempId('polygon'),
-        name: `New polygon ${unsavedCount + 1}`,
+        // Chosen by the user before saving; an empty name gets a server default.
+        name: '',
         ring: state.draftVertices,
         isSaved: false,
       }
@@ -85,14 +85,19 @@ export function mapReducer(state: MapState, action: MapAction): MapState {
     case 'TOGGLE_POLYGON_SELECTION':
       return { ...state, selectedPolygonIds: toggle(state.selectedPolygonIds, action.id) }
 
+    case 'RENAME_POLYGON':
+      return {
+        ...state,
+        polygons: state.polygons.map((p) => (p.id === action.id && !p.isSaved ? { ...p, name: action.name } : p)),
+      }
+
     case 'SET_OBJECT_TEMPLATE':
       return { ...state, objectTemplate: action.template }
 
     case 'ADD_OBJECT': {
-      const unsavedCount = state.objects.filter((o) => !o.isSaved).length
       const object: MapObjectItem = {
         id: nextTempId('object'),
-        name: `New object ${unsavedCount + 1}`,
+        name: '',
         type: state.objectTemplate.type,
         symbol: state.objectTemplate.type === 'Symbol' ? state.objectTemplate.symbol : null,
         position: action.position,
@@ -123,6 +128,12 @@ export function mapReducer(state: MapState, action: MapAction): MapState {
 
     case 'TOGGLE_OBJECT_SELECTION':
       return { ...state, selectedObjectIds: toggle(state.selectedObjectIds, action.id) }
+
+    case 'RENAME_OBJECT':
+      return {
+        ...state,
+        objects: state.objects.map((o) => (o.id === action.id && !o.isSaved ? { ...o, name: action.name } : o)),
+      }
 
     case 'FOCUS_POINT':
       return { ...state, focus: { kind: 'point', position: action.position, key: (state.focus?.key ?? 0) + 1 } }
