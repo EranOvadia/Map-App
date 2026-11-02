@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using MapApp.BLL.Models;
 
 namespace MapApp.Api.Dtos;
 
@@ -14,9 +13,9 @@ public class SaveMapObjectItem
     [StringLength(100)]
     public string? Name { get; set; }
 
-    public MapObjectType Type { get; set; } = MapObjectType.Marker;
-
-    public string? Symbol { get; set; }
+    /// <summary>"marker", "star", "triangle", "square", "circle" or "jeep".</summary>
+    [Required]
+    public string Symbol { get; set; } = string.Empty;
 
     [Required]
     public PointGeometryDto Geometry { get; set; } = null!;

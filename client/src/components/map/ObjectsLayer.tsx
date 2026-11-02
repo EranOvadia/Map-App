@@ -25,7 +25,7 @@ export function ObjectsLayer() {
           <Marker
             key={object.id}
             position={toLatLng(object.position)}
-            icon={objectIcon(object.type, object.symbol, visualState)}
+            icon={objectIcon(object.symbol, visualState)}
             // Only unsaved objects can be repositioned before saving.
             draggable={!object.isSaved}
             eventHandlers={{

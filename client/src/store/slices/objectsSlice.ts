@@ -1,36 +1,34 @@
 import { createSlice, nanoid, type PayloadAction } from '@reduxjs/toolkit'
 import type { Position } from '../../types/geo'
-import type { MapObjectItem, ObjectTemplate } from '../../types/mapObject'
+import type { MapObjectItem, SymbolKind } from '../../types/mapObject'
 
 /** Client-only object state. Saved objects live in the RTK Query cache (api/mapApi). */
 interface ObjectsState {
   unsaved: MapObjectItem[]
   selectedIds: string[]
-  /** What the next placed object will look like. */
-  template: ObjectTemplate
+  /** Symbol of the next placed object. */
+  nextSymbol: SymbolKind
 }
 
 const initialState: ObjectsState = {
   unsaved: [],
   selectedIds: [],
-  template: { type: 'Marker', symbol: null },
+  nextSymbol: 'marker',
 }
 
 const objectsSlice = createSlice({
   name: 'objects',
   initialState,
   reducers: {
-    setObjectTemplate(state, action: PayloadAction<ObjectTemplate>) {
-      state.template = action.payload
+    setNextSymbol(state, action: PayloadAction<SymbolKind>) {
+      state.nextSymbol = action.payload
     },
     addObject: {
       reducer(state, action: PayloadAction<{ id: string; position: Position }>) {
-        const { type, symbol } = state.template
         state.unsaved.push({
           id: action.payload.id,
           name: '',
-          type,
-          symbol: type === 'Symbol' ? symbol : null,
+          symbol: state.nextSymbol,
           position: action.payload.position,
           isSaved: false,
         })
@@ -64,7 +62,7 @@ const objectsSlice = createSlice({
 })
 
 export const {
-  setObjectTemplate,
+  setNextSymbol,
   addObject,
   moveObject,
   renameObject,

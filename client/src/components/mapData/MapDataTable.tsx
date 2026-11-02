@@ -89,7 +89,7 @@ export function MapDataTable({
                   className="data-table__icon"
                   // Static SVG generated from constants in utils/symbols.
                   dangerouslySetInnerHTML={{
-                    __html: shapeSvg(object.type, object.symbol, selected ? STATE_COLORS.selected : STATE_COLORS.saved, 14),
+                    __html: shapeSvg(object.symbol, selected ? STATE_COLORS.selected : STATE_COLORS.saved, 14),
                   }}
                 />
                 {object.name}

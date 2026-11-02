@@ -6,9 +6,6 @@ namespace MapApp.BLL.Validation;
 
 public static class GeometryValidator
 {
-    public static readonly IReadOnlySet<string> AllowedSymbols =
-        new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "star", "triangle", "square", "circle" };
-
     public static void ValidatePoint(GeoPoint point)
     {
         if (!double.IsFinite(point.Longitude) || point.Longitude < -180 || point.Longitude > 180)
@@ -53,15 +50,8 @@ public static class GeometryValidator
     {
         ValidatePoint(mapObject.Location);
 
-        if (!Enum.IsDefined(mapObject.Type))
-            throw new ValidationException($"Unknown object type '{mapObject.Type}'.");
-
-        if (mapObject.Type == MapObjectType.Symbol)
-        {
-            if (string.IsNullOrWhiteSpace(mapObject.Symbol) || !AllowedSymbols.Contains(mapObject.Symbol))
-                throw new ValidationException(
-                    $"Symbol must be one of: {string.Join(", ", AllowedSymbols)}.");
-        }
+        if (!MapSymbols.IsValid(mapObject.Symbol))
+            throw new ValidationException($"Symbol must be one of: {string.Join(", ", MapSymbols.All)}.");
     }
 
     public static void ValidateId(string? id)

@@ -27,7 +27,6 @@ public static class EntityMapper
     {
         Id = entity.Id,
         Name = entity.Name,
-        Type = Enum.TryParse<MapObjectType>(entity.Type, out var type) ? type : MapObjectType.Marker,
         Symbol = entity.Symbol,
         CreatedAt = entity.CreatedAt,
         Location = ToGeoPoint(entity.Location.Coordinates)
@@ -37,8 +36,7 @@ public static class EntityMapper
     {
         Id = model.Id,
         Name = model.Name,
-        Type = model.Type.ToString(),
-        Symbol = model.Type == MapObjectType.Symbol ? model.Symbol?.ToLowerInvariant() : null,
+        Symbol = model.Symbol.ToLowerInvariant(),
         CreatedAt = model.CreatedAt,
         Location = GeoJson.Point(ToCoordinates(model.Location))
     };
