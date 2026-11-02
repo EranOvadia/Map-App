@@ -2,10 +2,11 @@ import { useEffect } from 'react'
 import { usePolygons } from '../../hooks/usePolygons'
 import { usePolygonDrawing } from '../../hooks/usePolygonDrawing'
 import { useMapContext } from '../../state/MapContext'
+import { UnsavedNameList } from '../common/UnsavedNameList'
 import { Panel } from '../layout/Panel'
 
 export function PolygonPanel() {
-  const { dispatch } = useMapContext()
+  const { state, dispatch } = useMapContext()
   const { isDrawing, vertices } = usePolygonDrawing()
   const polygons = usePolygons()
   const { reload } = polygons
@@ -13,6 +14,8 @@ export function PolygonPanel() {
   useEffect(() => {
     reload()
   }, [reload])
+
+  const unsavedPolygons = state.polygons.filter((p) => !p.isSaved)
 
   const toggleDrawing = () => dispatch({ type: 'SET_MODE', mode: isDrawing ? 'idle' : 'drawPolygon' })
 
@@ -60,6 +63,13 @@ export function PolygonPanel() {
           Delete all
         </button>
       </div>
+      <UnsavedNameList
+        items={unsavedPolygons}
+        placeholder="Polygon name (optional)"
+        disabled={polygons.busy}
+        onRename={(id, name) => dispatch({ type: 'RENAME_POLYGON', id, name })}
+        onDiscard={(id) => dispatch({ type: 'REMOVE_POLYGONS', ids: [id] })}
+      />
       <p className="muted">
         {isDrawing
           ? `Drawing: ${vertices.length} vertex(es). Click the first vertex to close (min. 3).`

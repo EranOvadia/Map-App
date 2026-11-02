@@ -26,6 +26,7 @@ export type MapAction =
   | { type: 'SET_SAVED_POLYGONS'; polygons: MapPolygon[] }
   | { type: 'REMOVE_POLYGONS'; ids: string[] }
   | { type: 'TOGGLE_POLYGON_SELECTION'; id: string }
+  | { type: 'RENAME_POLYGON'; id: string; name: string }
   // Objects
   | { type: 'SET_OBJECT_TEMPLATE'; template: ObjectTemplate }
   | { type: 'ADD_OBJECT'; position: Position }
@@ -33,6 +34,7 @@ export type MapAction =
   | { type: 'SET_SAVED_OBJECTS'; objects: MapObjectItem[] }
   | { type: 'REMOVE_OBJECTS'; ids: string[] }
   | { type: 'TOGGLE_OBJECT_SELECTION'; id: string }
+  | { type: 'RENAME_OBJECT'; id: string; name: string }
   // Map
   | { type: 'FOCUS_POINT'; position: Position }
   | { type: 'FOCUS_BOUNDS'; positions: Position[] }

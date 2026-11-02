@@ -3,6 +3,7 @@ import type { Marker as LeafletMarker } from 'leaflet'
 import { useMapContext } from '../../state/MapContext'
 import { toLatLng, toPosition } from '../../utils/geoConvert'
 import { objectIcon } from '../../utils/symbols'
+import { displayName } from '../../utils/names'
 
 export function ObjectsLayer() {
   const { state, dispatch } = useMapContext()
@@ -30,7 +31,7 @@ export function ObjectsLayer() {
             }}
           >
             <Tooltip direction="top">
-              {object.name}
+              {displayName(object.name, 'Unnamed object')}
               {!object.isSaved && ' (unsaved, drag to move)'}
             </Tooltip>
           </Marker>

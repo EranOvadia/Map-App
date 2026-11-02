@@ -157,6 +157,64 @@
   color: var(--primary);
 }
 
+/* ---------- Unsaved name list ---------- */
+.name-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 132px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.name-list__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.name-list__icon {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.name-list__input {
+  flex: 1;
+  min-width: 0;
+  padding: 5px 8px;
+  border: 1px solid #fcd34d;
+  border-radius: 6px;
+  background: #fffbeb;
+  font: inherit;
+  font-size: 13px;
+}
+
+.name-list__input:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: -1px;
+  background: var(--surface);
+}
+
+.name-list__discard {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.name-list__discard:hover:not(:disabled) {
+  color: var(--danger);
+  border-color: #fecaca;
+}
+
 /* ---------- Symbol picker ---------- */
 .symbol-picker {
   display: flex;

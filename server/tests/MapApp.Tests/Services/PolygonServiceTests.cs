@@ -60,6 +60,15 @@ public class PolygonServiceTests
     }
 
     [Fact]
+    public async Task CreateAsync_WithName_KeepsTrimmedChosenName()
+    {
+        var result = await _service.CreateAsync("  North field  ", Triangle);
+
+        Assert.Equal("North field", result.Name);
+        _repository.Verify(r => r.CountAsync(It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
     public async Task CreateAsync_InvalidRing_ThrowsAndDoesNotInsert()
     {
         await Assert.ThrowsAsync<ValidationException>(() => _service.CreateAsync("x", [new(0, 0), new(1, 1)]));

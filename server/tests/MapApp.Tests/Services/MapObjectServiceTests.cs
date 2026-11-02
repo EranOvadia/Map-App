@@ -47,6 +47,21 @@ public class MapObjectServiceTests
     }
 
     [Fact]
+    public async Task SaveManyAsync_KeepsChosenNames_AndDefaultsOnlyBlankOnes()
+    {
+        _repository.Setup(r => r.CountAsync(It.IsAny<CancellationToken>())).ReturnsAsync(0);
+        var input = new List<MapObject>
+        {
+            new() { Name = "  Gate A  ", Type = MapObjectType.Marker, Location = new GeoPoint(34.78, 32.08) },
+            new() { Name = " ", Type = MapObjectType.Marker, Location = new GeoPoint(34.79, 32.09) }
+        };
+
+        var result = await _service.SaveManyAsync(input);
+
+        Assert.Equal(["Gate A", "Object 1"], result.Select(o => o.Name));
+    }
+
+    [Fact]
     public async Task SaveManyAsync_Empty_Throws()
     {
         await Assert.ThrowsAsync<ValidationException>(() => _service.SaveManyAsync([]));
