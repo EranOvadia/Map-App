@@ -2,6 +2,7 @@ using MapApp.DAL.Configuration;
 using MapApp.DAL.Context;
 using MapApp.DAL.Indexes;
 using MapApp.DAL.Interfaces;
+using MapApp.DAL.Migrations;
 using MapApp.DAL.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,6 +36,7 @@ public static class DalServiceCollectionExtensions
         services.AddScoped<IMapObjectRepository, MapObjectRepository>();
 
         services.AddHostedService<MongoIndexInitializer>();
+        services.AddHostedService<MapObjectSymbolMigration>();
 
         return services;
     }

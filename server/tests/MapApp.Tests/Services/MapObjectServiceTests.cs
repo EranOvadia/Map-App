@@ -29,20 +29,20 @@ public class MapObjectServiceTests
         _repository.Setup(r => r.CountAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
         var input = new List<MapObject>
         {
-            new() { Type = MapObjectType.Marker, Location = new GeoPoint(34.78, 32.08) },
-            new() { Type = MapObjectType.Symbol, Symbol = "Star", Location = new GeoPoint(34.79, 32.09) }
+            new() { Symbol = "marker", Location = new GeoPoint(34.78, 32.08) },
+            new() { Symbol = "Jeep", Location = new GeoPoint(34.79, 32.09) }
         };
 
         var result = await _service.SaveManyAsync(input);
 
         Assert.Equal(["Object 2", "Object 3"], result.Select(o => o.Name));
-        Assert.Equal("star", result[1].Symbol);
+        Assert.Equal(["marker", "jeep"], result.Select(o => o.Symbol));
         _repository.Verify(r => r.InsertManyAsync(
             It.Is<IReadOnlyList<MapObjectEntity>>(l =>
                 l.Count == 2
                 && l[0].Location.Coordinates.Longitude == 34.78
                 && l[0].Location.Coordinates.Latitude == 32.08
-                && l[0].Symbol == null),
+                && l[1].Symbol == "jeep"),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -52,8 +52,8 @@ public class MapObjectServiceTests
         _repository.Setup(r => r.CountAsync(It.IsAny<CancellationToken>())).ReturnsAsync(0);
         var input = new List<MapObject>
         {
-            new() { Name = "  Gate A  ", Type = MapObjectType.Marker, Location = new GeoPoint(34.78, 32.08) },
-            new() { Name = " ", Type = MapObjectType.Marker, Location = new GeoPoint(34.79, 32.09) }
+            new() { Name = "  Gate A  ", Symbol = "marker", Location = new GeoPoint(34.78, 32.08) },
+            new() { Name = " ", Symbol = "marker", Location = new GeoPoint(34.79, 32.09) }
         };
 
         var result = await _service.SaveManyAsync(input);
@@ -70,7 +70,7 @@ public class MapObjectServiceTests
     [Fact]
     public async Task SaveManyAsync_InvalidObject_ThrowsAndDoesNotInsert()
     {
-        var input = new List<MapObject> { new() { Type = MapObjectType.Marker, Location = new GeoPoint(200, 0) } };
+        var input = new List<MapObject> { new() { Symbol = "marker", Location = new GeoPoint(200, 0) } };
 
         await Assert.ThrowsAsync<ValidationException>(() => _service.SaveManyAsync(input));
         _repository.Verify(r => r.InsertManyAsync(It.IsAny<IReadOnlyList<MapObjectEntity>>(), It.IsAny<CancellationToken>()), Times.Never);

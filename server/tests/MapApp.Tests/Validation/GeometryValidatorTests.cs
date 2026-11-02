@@ -76,18 +76,24 @@ public class GeometryValidatorTests
         Assert.Throws<ValidationException>(() => GeometryValidator.ValidatePoint(new GeoPoint(lon, lat)));
     }
 
-    [Fact]
-    public void ValidateMapObject_SymbolWithoutKnownSymbol_Throws()
+    [Theory]
+    [InlineData("dragon")]
+    [InlineData("")]
+    [InlineData(null)]
+    public void ValidateMapObject_UnknownOrMissingSymbol_Throws(string? symbol)
     {
-        var obj = new MapObject { Type = MapObjectType.Symbol, Symbol = "dragon", Location = A };
+        var obj = new MapObject { Symbol = symbol!, Location = A };
 
         Assert.Throws<ValidationException>(() => GeometryValidator.ValidateMapObject(obj));
     }
 
-    [Fact]
-    public void ValidateMapObject_MarkerWithoutSymbol_IsValid()
+    [Theory]
+    [InlineData("marker")]
+    [InlineData("jeep")]
+    [InlineData("Star")]
+    public void ValidateMapObject_KnownSymbol_IsValid(string symbol)
     {
-        var obj = new MapObject { Type = MapObjectType.Marker, Location = A };
+        var obj = new MapObject { Symbol = symbol, Location = A };
 
         GeometryValidator.ValidateMapObject(obj);
     }

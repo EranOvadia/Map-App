@@ -13,7 +13,6 @@ function polygonFromDto(dto: PolygonDto): MapPolygon {
 const objectFromDto = (dto: MapObjectDto): MapObjectItem => ({
   id: dto.id,
   name: dto.name,
-  type: dto.type,
   symbol: dto.symbol,
   position: dto.geometry.coordinates,
   isSaved: true,

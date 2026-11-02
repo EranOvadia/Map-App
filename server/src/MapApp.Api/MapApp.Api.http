@@ -27,8 +27,8 @@ Content-Type: application/json
 
 {
   "objects": [
-    { "type": "Marker", "geometry": { "type": "Point", "coordinates": [34.78, 32.08] } },
-    { "type": "Symbol", "symbol": "star", "geometry": { "type": "Point", "coordinates": [34.79, 32.09] } }
+    { "symbol": "marker", "geometry": { "type": "Point", "coordinates": [34.78, 32.08] } },
+    { "symbol": "jeep", "geometry": { "type": "Point", "coordinates": [34.79, 32.09] } }
   ]
 }
 

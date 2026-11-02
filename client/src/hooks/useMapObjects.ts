@@ -40,7 +40,6 @@ export function useMapObjects() {
       const result = await saveObjects(
         unsaved.map((o) => ({
           name: nameForApi(o.name),
-          type: o.type,
           symbol: o.symbol,
           geometry: { type: 'Point', coordinates: o.position },
         })),

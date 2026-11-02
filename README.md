@@ -12,7 +12,7 @@ persisted as GeoJSON in MongoDB.
 |---|---|---|
 | **Map** | left | Interactive map (OpenStreetMap tiles). |
 | **Polygon** | top right | **Add**: drawing mode — click to add vertices, click the first vertex to close (Esc cancels). **Save**: POSTs unsaved polygons. **Delete selected / Delete all**: DELETE from map and DB. |
-| **Objects** | middle right | Pick *Marker* or a custom symbol (star, triangle, square, circle). **Add**: click the map to place (unsaved objects can be dragged). **Save**: POSTs the list of unsaved objects. **Delete selected**: DELETE from map and DB. |
+| **Objects** | middle right | Pick a symbol: marker (pin), star, triangle, square, circle or jeep. **Add**: click the map to place (unsaved objects can be dragged). **Save**: POSTs the list of unsaved objects. **Delete selected**: DELETE from map and DB. |
 | **Map Data** | bottom right | Table of saved data: Object / Lat / Lon. Polygons show their centroid and expand to list vertices. Click a row to select it and fly to it. |
 
 Click a polygon or object on the map to select it. Colours: blue = saved, orange = unsaved, red = selected.
@@ -74,7 +74,7 @@ dotnet test server/MapApp.slnx
 | DELETE | `/api/polygons/{id}` | — | `204` / `404` |
 | DELETE | `/api/polygons` | — (all) | `204` |
 | GET | `/api/objects` | — | `MapObjectDto[]` |
-| POST | `/api/objects` | `{ objects: [{ name?, type: "Marker"\|"Symbol", symbol?, geometry: { type: "Point", coordinates: [lon,lat] } }] }` | `201 MapObjectDto[]` |
+| POST | `/api/objects` | `{ objects: [{ name?, symbol: "marker"\|"star"\|"triangle"\|"square"\|"circle"\|"jeep", geometry: { type: "Point", coordinates: [lon,lat] } }] }` | `201 MapObjectDto[]` |
 | DELETE | `/api/objects/{id}` | — | `204` / `404` |
 | DELETE | `/api/objects?ids=id1,id2` | — (selected) | `204` |
 
@@ -92,7 +92,7 @@ Collection `polygons` (2dsphere index on `geometry`):
 Collection `mapObjects` (2dsphere index on `location`):
 
 ```json
-{ "_id": ObjectId, "name": "Object 1", "type": "Symbol", "symbol": "star", "createdAt": ISODate,
+{ "_id": ObjectId, "name": "Object 1", "symbol": "jeep", "createdAt": ISODate,
   "location": { "type": "Point", "coordinates": [34.78, 32.08] } }
 ```
 

@@ -22,7 +22,6 @@ public static class DtoMappingExtensions
     {
         Id = model.Id ?? string.Empty,
         Name = model.Name,
-        Type = model.Type,
         Symbol = model.Symbol,
         CreatedAt = model.CreatedAt,
         Geometry = new PointGeometryDto { Coordinates = [model.Location.Longitude, model.Location.Latitude] }
@@ -47,7 +46,6 @@ public static class DtoMappingExtensions
         return new MapObject
         {
             Name = item.Name ?? string.Empty,
-            Type = item.Type,
             Symbol = item.Symbol,
             Location = ToGeoPoint(item.Geometry.Coordinates)
         };

@@ -12,11 +12,8 @@ public class MapObjectEntity
 
     public string Name { get; set; } = string.Empty;
 
-    /// <summary>"Marker" or "Symbol".</summary>
-    public string Type { get; set; } = string.Empty;
-
-    /// <summary>Symbol key (e.g. "star") when Type is "Symbol"; otherwise null.</summary>
-    public string? Symbol { get; set; }
+    /// <summary>How the object is drawn: "marker", "star", "triangle", "square", "circle" or "jeep".</summary>
+    public string Symbol { get; set; } = string.Empty;
 
     public DateTime CreatedAt { get; set; }
 
