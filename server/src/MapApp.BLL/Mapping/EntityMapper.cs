@@ -27,8 +27,7 @@ public static class EntityMapper
     {
         Id = entity.Id,
         Name = entity.Name,
-        // A document without a symbol (only possible before the migration ran) is a marker.
-        Symbol = string.IsNullOrWhiteSpace(entity.Symbol) ? MapSymbols.Marker : entity.Symbol,
+        Symbol = entity.Symbol,
         CreatedAt = entity.CreatedAt,
         Location = ToGeoPoint(entity.Location.Coordinates)
     };
