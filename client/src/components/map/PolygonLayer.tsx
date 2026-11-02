@@ -5,13 +5,21 @@ import { useSavedPolygons } from '../../hooks/useSavedData'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { togglePolygonSelection } from '../../store/slices/polygonsSlice'
 import type { MapPolygon } from '../../types/polygon'
-import { toLatLngs } from '../../utils/geoConvert'
 import { displayName } from '../../utils/names'
 
+// One object per visual state, created once. Each lists every property we vary, because
+// Leaflet's setStyle() merges into the previous options: a property left out (e.g. dashArray)
+// would keep its old value. Stable references also mean react-leaflet only calls setStyle()
+// on a polygon whose state actually changed.
+const POLYGON_STYLES = {
+  saved: { color: '#2563eb', fillColor: '#2563eb', weight: 2, dashArray: undefined, fillOpacity: 0.2 },
+  unsaved: { color: '#f59e0b', fillColor: '#f59e0b', weight: 3, dashArray: '8 6', fillOpacity: 0.2 },
+  selected: { color: '#dc2626', fillColor: '#dc2626', weight: 4, dashArray: undefined, fillOpacity: 0.3 },
+} satisfies Record<string, PathOptions>
+
 function styleFor(polygon: MapPolygon, selected: boolean): PathOptions {
-  if (selected) return { color: '#dc2626', weight: 4, fillOpacity: 0.3 }
-  if (!polygon.isSaved) return { color: '#f59e0b', weight: 3, dashArray: '8 6', fillOpacity: 0.2 }
-  return { color: '#2563eb', weight: 2, fillOpacity: 0.2 }
+  if (selected) return POLYGON_STYLES.selected
+  return polygon.isSaved ? POLYGON_STYLES.saved : POLYGON_STYLES.unsaved
 }
 
 export function PolygonLayer() {
@@ -29,7 +37,9 @@ export function PolygonLayer() {
         return (
           <Polygon
             key={polygon.id}
-            positions={toLatLngs(polygon.ring)}
+            // Stored, not converted here: a new array each render would make react-leaflet
+            // call setLatLngs() and redraw every polygon.
+            positions={polygon.latLngs}
             pathOptions={styleFor(polygon, selected)}
             eventHandlers={{
               click: () => {

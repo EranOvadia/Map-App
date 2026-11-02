@@ -1,6 +1,7 @@
 import { createSlice, nanoid, type PayloadAction } from '@reduxjs/toolkit'
 import type { Position } from '../../types/geo'
 import type { MapPolygon } from '../../types/polygon'
+import { toLatLngs } from '../../utils/geoConvert'
 import { setMode } from '../sharedActions'
 
 export const MIN_POLYGON_VERTICES = 3
@@ -30,7 +31,13 @@ const polygonsSlice = createSlice({
       reducer(state, action: PayloadAction<{ id: string }>) {
         if (state.draftVertices.length < MIN_POLYGON_VERTICES) return
         // Unnamed until the user types a name; an empty name gets a server default.
-        state.unsaved.push({ id: action.payload.id, name: '', ring: state.draftVertices, isSaved: false })
+        state.unsaved.push({
+          id: action.payload.id,
+          name: '',
+          ring: state.draftVertices,
+          latLngs: toLatLngs(state.draftVertices),
+          isSaved: false,
+        })
         state.draftVertices = []
       },
       prepare: () => ({ payload: { id: `polygon-${nanoid()}` } }),
