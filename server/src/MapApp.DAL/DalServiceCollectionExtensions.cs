@@ -14,7 +14,13 @@ public static class DalServiceCollectionExtensions
 {
     public static IServiceCollection AddDal(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<MongoDbSettings>(configuration.GetSection(MongoDbSettings.SectionName));
+        // Fail at startup with a clear message instead of on the first request.
+        services.AddOptions<MongoDbSettings>()
+            .Bind(configuration.GetSection(MongoDbSettings.SectionName))
+            .Validate(s => !string.IsNullOrWhiteSpace(s.ConnectionString),
+                "MongoDb:ConnectionString is not set. Copy server/src/MapApp.Api/.env.example to .env and fill it in.")
+            .Validate(s => !string.IsNullOrWhiteSpace(s.DatabaseName), "MongoDb:DatabaseName is not set.")
+            .ValidateOnStart();
 
         services.AddSingleton<IMongoClient>(sp =>
         {

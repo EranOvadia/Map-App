@@ -6,6 +6,9 @@ obj/
 .vs/
 TestResults/
 
+# Server secrets (commit server/src/MapApp.Api/.env.example instead)
+server/**/.env
+
 # Node
 node_modules/
 dist/
