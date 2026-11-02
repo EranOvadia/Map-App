@@ -1,7 +1,7 @@
 import { Fragment, useState } from 'react'
 import type { MapObjectItem } from '../../types/mapObject'
 import type { MapPolygon } from '../../types/polygon'
-import { centroid, formatCoord } from '../../utils/geoConvert'
+import { cachedCentroid, formatCoord } from '../../utils/geoConvert'
 import { STATE_COLORS, shapeSvg } from '../../utils/symbols'
 
 interface MapDataTableProps {
@@ -37,7 +37,7 @@ export function MapDataTable({
       </thead>
       <tbody>
         {polygons.map((polygon) => {
-          const [lon, lat] = centroid(polygon.ring)
+          const [lon, lat] = cachedCentroid(polygon.ring)
           const isExpanded = expanded.includes(polygon.id)
           const selected = selectedPolygonIds.includes(polygon.id)
           return (
