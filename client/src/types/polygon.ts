@@ -1,3 +1,4 @@
+import type { LatLngTuple } from 'leaflet'
 import type { PolygonGeometry, Position } from './geo'
 
 /** Polygon as returned by the API. */
@@ -20,5 +21,10 @@ export interface MapPolygon {
   name: string
   /** Open outer ring in GeoJSON [lon, lat] order. */
   ring: Position[]
+  /**
+   * The same ring in Leaflet [lat, lon] order, converted once when the polygon enters the app.
+   * Its reference stays stable, so react-leaflet skips setLatLngs() on unrelated re-renders.
+   */
+  latLngs: LatLngTuple[]
   isSaved: boolean
 }

@@ -5,7 +5,6 @@ import { useSavedPolygons } from '../../hooks/useSavedData'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { togglePolygonSelection } from '../../store/slices/polygonsSlice'
 import type { MapPolygon } from '../../types/polygon'
-import { toLatLngs } from '../../utils/geoConvert'
 import { displayName } from '../../utils/names'
 
 function styleFor(polygon: MapPolygon, selected: boolean): PathOptions {
@@ -29,7 +28,9 @@ export function PolygonLayer() {
         return (
           <Polygon
             key={polygon.id}
-            positions={toLatLngs(polygon.ring)}
+            // Stored, not converted here: a new array each render would make react-leaflet
+            // call setLatLngs() and redraw every polygon.
+            positions={polygon.latLngs}
             pathOptions={styleFor(polygon, selected)}
             eventHandlers={{
               click: () => {

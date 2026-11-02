@@ -1,16 +1,14 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import type { MapObjectDto, MapObjectItem, SaveMapObjectItem } from '../types/mapObject'
 import type { CreatePolygonRequest, MapPolygon, PolygonDto } from '../types/polygon'
-import { openRing } from '../utils/geoConvert'
+import { openRing, toLatLngs } from '../utils/geoConvert'
 
 const BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
 
-const polygonFromDto = (dto: PolygonDto): MapPolygon => ({
-  id: dto.id,
-  name: dto.name,
-  ring: openRing(dto.geometry.coordinates[0] ?? []),
-  isSaved: true,
-})
+function polygonFromDto(dto: PolygonDto): MapPolygon {
+  const ring = openRing(dto.geometry.coordinates[0] ?? [])
+  return { id: dto.id, name: dto.name, ring, latLngs: toLatLngs(ring), isSaved: true }
+}
 
 const objectFromDto = (dto: MapObjectDto): MapObjectItem => ({
   id: dto.id,
