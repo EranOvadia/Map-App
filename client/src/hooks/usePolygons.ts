@@ -1,40 +1,43 @@
-import { useCallback, useState } from 'react'
-import { errorMessage } from '../api/httpClient'
-import { polygonsApi } from '../api/polygonsApi'
-import { useMapContext } from '../state/MapContext'
-import type { MapPolygon, PolygonDto } from '../types/polygon'
-import { closeRing, openRing } from '../utils/geoConvert'
+import { useEffect, useState } from 'react'
+import { apiErrorMessage } from '../api/apiError'
+import {
+  useCreatePolygonMutation,
+  useDeleteAllPolygonsMutation,
+  useDeletePolygonMutation,
+  useGetPolygonsQuery,
+} from '../api/mapApi'
+import { useAppDispatch, useAppSelector } from '../store/hooks'
+import { deselectPolygons, removeUnsavedPolygons } from '../store/slices/polygonsSlice'
+import { setStatus } from '../store/slices/uiSlice'
+import type { MapPolygon } from '../types/polygon'
+import { closeRing } from '../utils/geoConvert'
 import { nameForApi } from '../utils/names'
 
-const fromDto = (dto: PolygonDto): MapPolygon => ({
-  id: dto.id,
-  name: dto.name,
-  ring: openRing(dto.geometry.coordinates[0] ?? []),
-  isSaved: true,
-})
+const NO_POLYGONS: MapPolygon[] = []
 
-/** Polygon CRUD against the API; keeps client state in sync. */
+/** Polygon save/delete actions and counts for the Polygon panel. */
 export function usePolygons() {
-  const { state, dispatch } = useMapContext()
+  const dispatch = useAppDispatch()
+  const { data: saved = NO_POLYGONS, error: loadError } = useGetPolygonsQuery()
+  const unsaved = useAppSelector((state) => state.polygons.unsaved)
+  const selectedIds = useAppSelector((state) => state.polygons.selectedIds)
+  const [createPolygon] = useCreatePolygonMutation()
+  const [deletePolygon] = useDeletePolygonMutation()
+  const [deleteAllPolygons] = useDeleteAllPolygonsMutation()
   const [busy, setBusy] = useState(false)
 
-  const setError = useCallback(
-    (prefix: string, error: unknown) =>
-      dispatch({ type: 'SET_STATUS', status: { kind: 'error', text: `${prefix}: ${errorMessage(error)}` } }),
-    [dispatch],
-  )
+  const success = (text: string) => dispatch(setStatus({ kind: 'success', text }))
+  const failure = (prefix: string, error: unknown) =>
+    dispatch(setStatus({ kind: 'error', text: `${prefix}: ${apiErrorMessage(error)}` }))
 
-  const reload = useCallback(async () => {
-    try {
-      const dtos = await polygonsApi.getAll()
-      dispatch({ type: 'SET_SAVED_POLYGONS', polygons: dtos.map(fromDto) })
-    } catch (error) {
-      setError('Loading polygons failed', error)
-    }
-  }, [dispatch, setError])
+  useEffect(() => {
+    if (loadError)
+      dispatch(setStatus({ kind: 'error', text: `Loading polygons failed: ${apiErrorMessage(loadError)}` }))
+  }, [loadError, dispatch])
 
-  const unsaved = state.polygons.filter((p) => !p.isSaved)
-  const selected = state.polygons.filter((p) => state.selectedPolygonIds.includes(p.id))
+  const selectedSaved = saved.filter((p) => selectedIds.includes(p.id))
+  const selectedUnsaved = unsaved.filter((p) => selectedIds.includes(p.id))
+  const selectedCount = selectedSaved.length + selectedUnsaved.length
 
   const saveUnsaved = async () => {
     if (unsaved.length === 0) return
@@ -43,36 +46,34 @@ export function usePolygons() {
     try {
       // One POST per polygon; stop at the first failure so the rest stay on the map unsaved.
       for (const polygon of unsaved) {
-        await polygonsApi.create({
+        await createPolygon({
           name: nameForApi(polygon.name),
           geometry: { type: 'Polygon', coordinates: [closeRing(polygon.ring)] },
-        })
-        dispatch({ type: 'REMOVE_POLYGONS', ids: [polygon.id] })
+        }).unwrap()
+        dispatch(removeUnsavedPolygons([polygon.id]))
         savedCount++
       }
-      dispatch({ type: 'SET_STATUS', status: { kind: 'success', text: `Saved ${savedCount} polygon(s).` } })
+      success(`Saved ${savedCount} polygon(s).`)
     } catch (error) {
-      setError(`Saved ${savedCount} of ${unsaved.length} polygon(s)`, error)
+      failure(`Saved ${savedCount} of ${unsaved.length} polygon(s)`, error)
     } finally {
-      await reload()
       setBusy(false)
     }
   }
 
   const deleteSelected = async () => {
-    if (selected.length === 0) return
+    if (selectedCount === 0) return
     setBusy(true)
-    const savedIds = selected.filter((p) => p.isSaved).map((p) => p.id)
-    const unsavedIds = selected.filter((p) => !p.isSaved).map((p) => p.id)
     try {
-      dispatch({ type: 'REMOVE_POLYGONS', ids: unsavedIds })
-      await Promise.all(savedIds.map((id) => polygonsApi.deleteById(id)))
-      dispatch({ type: 'REMOVE_POLYGONS', ids: savedIds })
-      dispatch({ type: 'SET_STATUS', status: { kind: 'success', text: `Deleted ${selected.length} polygon(s).` } })
+      // Unsaved polygons only exist on the client.
+      dispatch(removeUnsavedPolygons(selectedUnsaved.map((p) => p.id)))
+      const savedIds = selectedSaved.map((p) => p.id)
+      await Promise.all(savedIds.map((id) => deletePolygon(id).unwrap()))
+      dispatch(deselectPolygons(savedIds))
+      success(`Deleted ${selectedCount} polygon(s).`)
     } catch (error) {
-      setError('Deleting polygons failed', error)
+      failure('Deleting polygons failed', error)
     } finally {
-      await reload()
       setBusy(false)
     }
   }
@@ -80,24 +81,24 @@ export function usePolygons() {
   const deleteAll = async () => {
     setBusy(true)
     try {
-      await polygonsApi.deleteAll()
-      dispatch({ type: 'REMOVE_POLYGONS', ids: state.polygons.map((p) => p.id) })
-      dispatch({ type: 'SET_STATUS', status: { kind: 'success', text: 'Deleted all polygons.' } })
+      await deleteAllPolygons().unwrap()
+      dispatch(removeUnsavedPolygons(unsaved.map((p) => p.id)))
+      dispatch(deselectPolygons(saved.map((p) => p.id)))
+      success('Deleted all polygons.')
     } catch (error) {
-      setError('Deleting all polygons failed', error)
+      failure('Deleting all polygons failed', error)
     } finally {
-      await reload()
       setBusy(false)
     }
   }
 
   return {
     busy,
-    savedCount: state.polygons.length - unsaved.length,
+    unsaved,
+    savedCount: saved.length,
     unsavedCount: unsaved.length,
-    selectedCount: selected.length,
-    totalCount: state.polygons.length,
-    reload,
+    selectedCount,
+    totalCount: saved.length + unsaved.length,
     saveUnsaved,
     deleteSelected,
     deleteAll,

@@ -1,15 +1,15 @@
 import { useEffect } from 'react'
 import { latLngBounds } from 'leaflet'
 import { useMap } from 'react-leaflet'
-import { useMapContext } from '../../state/MapContext'
+import { useAppSelector } from '../../store/hooks'
 import { toLatLng, toLatLngs } from '../../utils/geoConvert'
 
 const POINT_ZOOM = 15
 
-/** Moves the map whenever state.focus changes (e.g. a Map Data row was clicked). */
+/** Moves the map whenever ui.focus changes (e.g. a Map Data row was clicked). */
 export function FocusController() {
   const map = useMap()
-  const { focus } = useMapContext().state
+  const focus = useAppSelector((state) => state.ui.focus)
 
   useEffect(() => {
     if (!focus) return

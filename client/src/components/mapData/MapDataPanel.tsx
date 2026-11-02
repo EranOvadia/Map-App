@@ -1,23 +1,32 @@
-import { useMapContext } from '../../state/MapContext'
+import { useSavedObjects, useSavedPolygons } from '../../hooks/useSavedData'
+import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import { toggleObjectSelection } from '../../store/slices/objectsSlice'
+import { togglePolygonSelection } from '../../store/slices/polygonsSlice'
+import { focusBounds, focusPoint } from '../../store/slices/uiSlice'
 import type { MapObjectItem } from '../../types/mapObject'
 import type { MapPolygon } from '../../types/polygon'
 import { Panel } from '../layout/Panel'
 import { MapDataTable } from './MapDataTable'
 
-/** Table of everything saved in the database; clicking a row selects it and moves the map to it. */
+/**
+ * Table of everything saved in the database; clicking a row selects it and moves the map to it.
+ * Re-renders only when the saved lists or the selections change.
+ */
 export function MapDataPanel() {
-  const { state, dispatch } = useMapContext()
-  const polygons = state.polygons.filter((p) => p.isSaved)
-  const objects = state.objects.filter((o) => o.isSaved)
+  const dispatch = useAppDispatch()
+  const polygons = useSavedPolygons()
+  const objects = useSavedObjects()
+  const selectedPolygonIds = useAppSelector((state) => state.polygons.selectedIds)
+  const selectedObjectIds = useAppSelector((state) => state.objects.selectedIds)
 
   const onPolygonClick = (polygon: MapPolygon) => {
-    dispatch({ type: 'TOGGLE_POLYGON_SELECTION', id: polygon.id })
-    dispatch({ type: 'FOCUS_BOUNDS', positions: polygon.ring })
+    dispatch(togglePolygonSelection(polygon.id))
+    dispatch(focusBounds(polygon.ring))
   }
 
   const onObjectClick = (object: MapObjectItem) => {
-    dispatch({ type: 'TOGGLE_OBJECT_SELECTION', id: object.id })
-    dispatch({ type: 'FOCUS_POINT', position: object.position })
+    dispatch(toggleObjectSelection(object.id))
+    dispatch(focusPoint(object.position))
   }
 
   const isEmpty = polygons.length === 0 && objects.length === 0
@@ -34,8 +43,8 @@ export function MapDataPanel() {
         <MapDataTable
           polygons={polygons}
           objects={objects}
-          selectedPolygonIds={state.selectedPolygonIds}
-          selectedObjectIds={state.selectedObjectIds}
+          selectedPolygonIds={selectedPolygonIds}
+          selectedObjectIds={selectedObjectIds}
           onPolygonClick={onPolygonClick}
           onObjectClick={onObjectClick}
         />
