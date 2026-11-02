@@ -13,7 +13,7 @@ persisted as GeoJSON in MongoDB.
 | **Map** | left | Interactive map (OpenStreetMap tiles). |
 | **Polygon** | top right | **Add**: drawing mode — click to add vertices, click the first vertex to close (Esc cancels). **Save**: POSTs unsaved polygons. **Delete selected / Delete all**: DELETE from map and DB. |
 | **Objects** | middle right | Pick *Marker* or a custom symbol (star, triangle, square, circle). **Add**: click the map to place (unsaved objects can be dragged). **Save**: POSTs the list of unsaved objects. **Delete selected**: DELETE from map and DB. |
-| **Map Data** | bottom right | Table of saved data: Object / Type / Lat / Lon. Polygons show their centroid and expand to list vertices. Click a row to select it and fly to it. |
+| **Map Data** | bottom right | Table of saved data: Object / Lat / Lon. Polygons show their centroid and expand to list vertices. Click a row to select it and fly to it. |
 
 Click a polygon or object on the map to select it. Colours: blue = saved, orange = unsaved, red = selected.
 

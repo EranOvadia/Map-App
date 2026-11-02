@@ -31,7 +31,6 @@ export function MapDataTable({
       <thead>
         <tr>
           <th>Object</th>
-          <th>Type</th>
           <th className="num">Lat</th>
           <th className="num">Lon</th>
         </tr>
@@ -60,10 +59,7 @@ export function MapDataTable({
                   >
                     {isExpanded ? '▾' : '▸'}
                   </button>
-                  {polygon.name}
-                </td>
-                <td>
-                  Polygon <span className="muted">({polygon.ring.length} pts)</span>
+                  {polygon.name} <span className="muted">({polygon.ring.length} pts)</span>
                 </td>
                 <td className="num" title="Centroid">{formatCoord(lat)}</td>
                 <td className="num" title="Centroid">{formatCoord(lon)}</td>
@@ -71,7 +67,7 @@ export function MapDataTable({
               {isExpanded &&
                 polygon.ring.map(([vLon, vLat], i) => (
                   <tr key={i} className="data-table__subrow">
-                    <td colSpan={2}>Vertex {i + 1}</td>
+                    <td>Vertex {i + 1}</td>
                     <td className="num">{formatCoord(vLat)}</td>
                     <td className="num">{formatCoord(vLon)}</td>
                   </tr>
@@ -98,7 +94,6 @@ export function MapDataTable({
                 />
                 {object.name}
               </td>
-              <td>{object.type === 'Symbol' ? `Symbol (${object.symbol})` : 'Marker'}</td>
               <td className="num">{formatCoord(lat)}</td>
               <td className="num">{formatCoord(lon)}</td>
             </tr>
