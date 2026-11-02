@@ -1,6 +1,6 @@
 import { MapContainer, TileLayer } from 'react-leaflet'
 import type { LatLngTuple } from 'leaflet'
-import { useMapContext } from '../../state/MapContext'
+import { useAppSelector } from '../../store/hooks'
 import { DrawingLayer } from './DrawingLayer'
 import { FocusController } from './FocusController'
 import { MapClickHandler } from './MapClickHandler'
@@ -16,7 +16,7 @@ const MODE_HINTS: Record<string, string> = {
 }
 
 export function MapView() {
-  const { mode } = useMapContext().state
+  const mode = useAppSelector((state) => state.ui.mode)
 
   return (
     <div className={`map-view map-view--${mode}`}>

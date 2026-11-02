@@ -101,10 +101,10 @@ server/
   src/MapApp.DAL/   Configuration, Context, Entities, Interfaces, Repositories, Indexes
   tests/MapApp.Tests/
 client/src/
-  api/              httpClient, polygonsApi, objectsApi
-  components/       layout, map, polygons, objects, mapData
-  hooks/            usePolygons, usePolygonDrawing, useMapObjects
-  state/            MapContext, mapReducer, actions
+  api/              mapApi (RTK Query endpoints + cache tags), apiError
+  components/       common, layout, map, polygons, objects, mapData
+  hooks/            usePolygons, useMapObjects, usePolygonDrawing, useSavedData
+  store/            Redux Toolkit store; slices: ui, polygons, objects (client-only state)
   types/            GeoJSON, polygon and object types
   utils/            geoConvert ([lon,lat] <-> Leaflet), symbols (SVG icons)
 ```

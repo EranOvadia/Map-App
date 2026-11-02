@@ -1,22 +1,19 @@
-import { useEffect } from 'react'
 import { useMapObjects } from '../../hooks/useMapObjects'
-import { useMapContext } from '../../state/MapContext'
+import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import { removeUnsavedObjects, renameObject, setObjectTemplate } from '../../store/slices/objectsSlice'
+import { setMode } from '../../store/sharedActions'
 import { STATE_COLORS, shapeSvg } from '../../utils/symbols'
 import { UnsavedNameList } from '../common/UnsavedNameList'
 import { Panel } from '../layout/Panel'
 import { SymbolPicker } from './SymbolPicker'
 
 export function ObjectsPanel() {
-  const { state, dispatch } = useMapContext()
+  const dispatch = useAppDispatch()
+  const isAdding = useAppSelector((state) => state.ui.mode === 'addObject')
+  const template = useAppSelector((state) => state.objects.template)
   const objects = useMapObjects()
-  const { reload } = objects
-  const isAdding = state.mode === 'addObject'
 
-  useEffect(() => {
-    reload()
-  }, [reload])
-
-  const toggleAdding = () => dispatch({ type: 'SET_MODE', mode: isAdding ? 'idle' : 'addObject' })
+  const toggleAdding = () => dispatch(setMode(isAdding ? 'idle' : 'addObject'))
 
   return (
     <Panel
@@ -24,10 +21,7 @@ export function ObjectsPanel() {
       className="panel--objects"
       meta={`${objects.savedCount} saved · ${objects.unsavedCount} unsaved · ${objects.selectedCount} selected`}
     >
-      <SymbolPicker
-        value={state.objectTemplate}
-        onChange={(template) => dispatch({ type: 'SET_OBJECT_TEMPLATE', template })}
-      />
+      <SymbolPicker value={template} onChange={(t) => dispatch(setObjectTemplate(t))} />
       <div className="button-row">
         <button
           type="button"
@@ -55,22 +49,20 @@ export function ObjectsPanel() {
         </button>
       </div>
       <UnsavedNameList
-        items={state.objects
-          .filter((o) => !o.isSaved)
-          .map((o) => ({
-            id: o.id,
-            name: o.name,
-            icon: (
-              <span
-                // Static SVG generated from constants in utils/symbols.
-                dangerouslySetInnerHTML={{ __html: shapeSvg(o.type, o.symbol, STATE_COLORS.unsaved, 16) }}
-              />
-            ),
-          }))}
+        items={objects.unsaved.map((o) => ({
+          id: o.id,
+          name: o.name,
+          icon: (
+            <span
+              // Static SVG generated from constants in utils/symbols.
+              dangerouslySetInnerHTML={{ __html: shapeSvg(o.type, o.symbol, STATE_COLORS.unsaved, 16) }}
+            />
+          ),
+        }))}
         placeholder="Object name (optional)"
         disabled={objects.busy}
-        onRename={(id, name) => dispatch({ type: 'RENAME_OBJECT', id, name })}
-        onDiscard={(id) => dispatch({ type: 'REMOVE_OBJECTS', ids: [id] })}
+        onRename={(id, name) => dispatch(renameObject({ id, name }))}
+        onDiscard={(id) => dispatch(removeUnsavedObjects([id]))}
       />
       <p className="muted">
         {isAdding

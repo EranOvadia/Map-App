@@ -1,17 +1,25 @@
+import { useMemo } from 'react'
 import { Marker, Tooltip } from 'react-leaflet'
 import type { Marker as LeafletMarker } from 'leaflet'
-import { useMapContext } from '../../state/MapContext'
+import { useSavedObjects } from '../../hooks/useSavedData'
+import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import { moveObject, toggleObjectSelection } from '../../store/slices/objectsSlice'
 import { toLatLng, toPosition } from '../../utils/geoConvert'
-import { objectIcon } from '../../utils/symbols'
 import { displayName } from '../../utils/names'
+import { objectIcon } from '../../utils/symbols'
 
 export function ObjectsLayer() {
-  const { state, dispatch } = useMapContext()
+  const dispatch = useAppDispatch()
+  const saved = useSavedObjects()
+  const unsaved = useAppSelector((state) => state.objects.unsaved)
+  const selectedIds = useAppSelector((state) => state.objects.selectedIds)
+  const mode = useAppSelector((state) => state.ui.mode)
+  const objects = useMemo(() => [...saved, ...unsaved], [saved, unsaved])
 
   return (
     <>
-      {state.objects.map((object) => {
-        const selected = state.selectedObjectIds.includes(object.id)
+      {objects.map((object) => {
+        const selected = selectedIds.includes(object.id)
         const visualState = selected ? 'selected' : object.isSaved ? 'saved' : 'unsaved'
         return (
           <Marker
@@ -22,11 +30,11 @@ export function ObjectsLayer() {
             draggable={!object.isSaved}
             eventHandlers={{
               click: () => {
-                if (state.mode !== 'drawPolygon') dispatch({ type: 'TOGGLE_OBJECT_SELECTION', id: object.id })
+                if (mode !== 'drawPolygon') dispatch(toggleObjectSelection(object.id))
               },
               dragend: (e) => {
                 const latlng = (e.target as LeafletMarker).getLatLng()
-                dispatch({ type: 'MOVE_OBJECT', id: object.id, position: toPosition(latlng) })
+                dispatch(moveObject({ id: object.id, position: toPosition(latlng) }))
               },
             }}
           >

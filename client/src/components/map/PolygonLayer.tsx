@@ -1,6 +1,9 @@
+import { useMemo } from 'react'
 import type { PathOptions } from 'leaflet'
 import { Polygon, Tooltip } from 'react-leaflet'
-import { useMapContext } from '../../state/MapContext'
+import { useSavedPolygons } from '../../hooks/useSavedData'
+import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import { togglePolygonSelection } from '../../store/slices/polygonsSlice'
 import type { MapPolygon } from '../../types/polygon'
 import { toLatLngs } from '../../utils/geoConvert'
 import { displayName } from '../../utils/names'
@@ -12,12 +15,17 @@ function styleFor(polygon: MapPolygon, selected: boolean): PathOptions {
 }
 
 export function PolygonLayer() {
-  const { state, dispatch } = useMapContext()
+  const dispatch = useAppDispatch()
+  const saved = useSavedPolygons()
+  const unsaved = useAppSelector((state) => state.polygons.unsaved)
+  const selectedIds = useAppSelector((state) => state.polygons.selectedIds)
+  const mode = useAppSelector((state) => state.ui.mode)
+  const polygons = useMemo(() => [...saved, ...unsaved], [saved, unsaved])
 
   return (
     <>
-      {state.polygons.map((polygon) => {
-        const selected = state.selectedPolygonIds.includes(polygon.id)
+      {polygons.map((polygon) => {
+        const selected = selectedIds.includes(polygon.id)
         return (
           <Polygon
             key={polygon.id}
@@ -26,7 +34,7 @@ export function PolygonLayer() {
             eventHandlers={{
               click: () => {
                 // In draw/add modes the click falls through to the map instead.
-                if (state.mode === 'idle') dispatch({ type: 'TOGGLE_POLYGON_SELECTION', id: polygon.id })
+                if (mode === 'idle') dispatch(togglePolygonSelection(polygon.id))
               },
             }}
           >

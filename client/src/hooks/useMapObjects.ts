@@ -1,89 +1,81 @@
-import { useCallback, useState } from 'react'
-import { errorMessage } from '../api/httpClient'
-import { objectsApi } from '../api/objectsApi'
-import { useMapContext } from '../state/MapContext'
-import type { MapObjectDto, MapObjectItem } from '../types/mapObject'
+import { useEffect, useState } from 'react'
+import { apiErrorMessage } from '../api/apiError'
+import { useDeleteObjectsMutation, useGetObjectsQuery, useSaveObjectsMutation } from '../api/mapApi'
+import { useAppDispatch, useAppSelector } from '../store/hooks'
+import { deselectObjects, removeUnsavedObjects } from '../store/slices/objectsSlice'
+import { setStatus } from '../store/slices/uiSlice'
+import type { MapObjectItem } from '../types/mapObject'
 import { nameForApi } from '../utils/names'
 
-const fromDto = (dto: MapObjectDto): MapObjectItem => ({
-  id: dto.id,
-  name: dto.name,
-  type: dto.type,
-  symbol: dto.symbol,
-  position: dto.geometry.coordinates,
-  isSaved: true,
-})
+const NO_OBJECTS: MapObjectItem[] = []
 
-/** Map object CRUD against the API; keeps client state in sync. */
+/** Object save/delete actions and counts for the Objects panel. */
 export function useMapObjects() {
-  const { state, dispatch } = useMapContext()
+  const dispatch = useAppDispatch()
+  const { data: saved = NO_OBJECTS, error: loadError } = useGetObjectsQuery()
+  const unsaved = useAppSelector((state) => state.objects.unsaved)
+  const selectedIds = useAppSelector((state) => state.objects.selectedIds)
+  const [saveObjects] = useSaveObjectsMutation()
+  const [deleteObjects] = useDeleteObjectsMutation()
   const [busy, setBusy] = useState(false)
 
-  const setError = useCallback(
-    (prefix: string, error: unknown) =>
-      dispatch({ type: 'SET_STATUS', status: { kind: 'error', text: `${prefix}: ${errorMessage(error)}` } }),
-    [dispatch],
-  )
+  const success = (text: string) => dispatch(setStatus({ kind: 'success', text }))
+  const failure = (prefix: string, error: unknown) =>
+    dispatch(setStatus({ kind: 'error', text: `${prefix}: ${apiErrorMessage(error)}` }))
 
-  const reload = useCallback(async () => {
-    try {
-      const dtos = await objectsApi.getAll()
-      dispatch({ type: 'SET_SAVED_OBJECTS', objects: dtos.map(fromDto) })
-    } catch (error) {
-      setError('Loading objects failed', error)
-    }
-  }, [dispatch, setError])
+  useEffect(() => {
+    if (loadError)
+      dispatch(setStatus({ kind: 'error', text: `Loading objects failed: ${apiErrorMessage(loadError)}` }))
+  }, [loadError, dispatch])
 
-  const unsaved = state.objects.filter((o) => !o.isSaved)
-  const selected = state.objects.filter((o) => state.selectedObjectIds.includes(o.id))
+  const selectedSaved = saved.filter((o) => selectedIds.includes(o.id))
+  const selectedUnsaved = unsaved.filter((o) => selectedIds.includes(o.id))
+  const selectedCount = selectedSaved.length + selectedUnsaved.length
 
   /** Sends all unsaved objects in a single POST. */
   const saveUnsaved = async () => {
     if (unsaved.length === 0) return
     setBusy(true)
     try {
-      const saved = await objectsApi.saveMany(
+      const result = await saveObjects(
         unsaved.map((o) => ({
           name: nameForApi(o.name),
           type: o.type,
           symbol: o.symbol,
           geometry: { type: 'Point', coordinates: o.position },
         })),
-      )
-      dispatch({ type: 'REMOVE_OBJECTS', ids: unsaved.map((o) => o.id) })
-      dispatch({ type: 'SET_STATUS', status: { kind: 'success', text: `Saved ${saved.length} object(s).` } })
+      ).unwrap()
+      dispatch(removeUnsavedObjects(unsaved.map((o) => o.id)))
+      success(`Saved ${result.length} object(s).`)
     } catch (error) {
-      setError('Saving objects failed', error)
+      failure('Saving objects failed', error)
     } finally {
-      await reload()
       setBusy(false)
     }
   }
 
   const deleteSelected = async () => {
-    if (selected.length === 0) return
+    if (selectedCount === 0) return
     setBusy(true)
-    const savedIds = selected.filter((o) => o.isSaved).map((o) => o.id)
-    const unsavedIds = selected.filter((o) => !o.isSaved).map((o) => o.id)
     try {
-      dispatch({ type: 'REMOVE_OBJECTS', ids: unsavedIds })
-      if (savedIds.length > 0) await objectsApi.deleteMany(savedIds)
-      dispatch({ type: 'REMOVE_OBJECTS', ids: savedIds })
-      dispatch({ type: 'SET_STATUS', status: { kind: 'success', text: `Deleted ${selected.length} object(s).` } })
+      dispatch(removeUnsavedObjects(selectedUnsaved.map((o) => o.id)))
+      const savedIds = selectedSaved.map((o) => o.id)
+      if (savedIds.length > 0) await deleteObjects(savedIds).unwrap()
+      dispatch(deselectObjects(savedIds))
+      success(`Deleted ${selectedCount} object(s).`)
     } catch (error) {
-      setError('Deleting objects failed', error)
+      failure('Deleting objects failed', error)
     } finally {
-      await reload()
       setBusy(false)
     }
   }
 
   return {
     busy,
-    savedCount: state.objects.length - unsaved.length,
+    unsaved,
+    savedCount: saved.length,
     unsavedCount: unsaved.length,
-    selectedCount: selected.length,
-    reload,
+    selectedCount,
     saveUnsaved,
     deleteSelected,
   }

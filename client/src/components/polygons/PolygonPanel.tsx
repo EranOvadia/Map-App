@@ -1,23 +1,17 @@
-import { useEffect } from 'react'
 import { usePolygons } from '../../hooks/usePolygons'
 import { usePolygonDrawing } from '../../hooks/usePolygonDrawing'
-import { useMapContext } from '../../state/MapContext'
+import { useAppDispatch } from '../../store/hooks'
+import { removeUnsavedPolygons, renamePolygon } from '../../store/slices/polygonsSlice'
+import { setMode } from '../../store/sharedActions'
 import { UnsavedNameList } from '../common/UnsavedNameList'
 import { Panel } from '../layout/Panel'
 
 export function PolygonPanel() {
-  const { state, dispatch } = useMapContext()
+  const dispatch = useAppDispatch()
   const { isDrawing, vertices } = usePolygonDrawing()
   const polygons = usePolygons()
-  const { reload } = polygons
 
-  useEffect(() => {
-    reload()
-  }, [reload])
-
-  const unsavedPolygons = state.polygons.filter((p) => !p.isSaved)
-
-  const toggleDrawing = () => dispatch({ type: 'SET_MODE', mode: isDrawing ? 'idle' : 'drawPolygon' })
+  const toggleDrawing = () => dispatch(setMode(isDrawing ? 'idle' : 'drawPolygon'))
 
   const confirmDeleteAll = () => {
     if (window.confirm('Delete ALL polygons from the map and the database?')) polygons.deleteAll()
@@ -64,11 +58,11 @@ export function PolygonPanel() {
         </button>
       </div>
       <UnsavedNameList
-        items={unsavedPolygons}
+        items={polygons.unsaved}
         placeholder="Polygon name (optional)"
         disabled={polygons.busy}
-        onRename={(id, name) => dispatch({ type: 'RENAME_POLYGON', id, name })}
-        onDiscard={(id) => dispatch({ type: 'REMOVE_POLYGONS', ids: [id] })}
+        onRename={(id, name) => dispatch(renamePolygon({ id, name }))}
+        onDiscard={(id) => dispatch(removeUnsavedPolygons([id]))}
       />
       <p className="muted">
         {isDrawing
