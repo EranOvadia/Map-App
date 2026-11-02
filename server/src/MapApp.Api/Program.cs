@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using DotNetEnv;
 using MapApp.Api.Middleware;
 using MapApp.BLL;
 using MapApp.DAL;
@@ -6,6 +7,13 @@ using MapApp.DAL;
 const string ClientCorsPolicy = "Client";
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Local settings (e.g. MongoDB credentials) live in a gitignored .env next to appsettings.json,
+// using ASP.NET's "Section__Key" names (MongoDb__ConnectionString). Load it into environment
+// variables, without overriding ones already set, then re-add the environment provider so these
+// values take precedence over appsettings.json.
+Env.NoClobber().Load(Path.Combine(builder.Environment.ContentRootPath, ".env"));
+builder.Configuration.AddEnvironmentVariables();
 
 builder.Services
     .AddControllers()

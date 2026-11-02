@@ -25,17 +25,21 @@ Click a polygon or object on the map to select it. Colours: blue = saved, orange
 
 ## Configuration
 
-MongoDB connection — `server/src/MapApp.Api/appsettings.json`:
+The MongoDB connection is kept out of git in `server/src/MapApp.Api/.env`. Create it from the
+committed template and fill in your container's port / credentials:
 
-```json
-"MongoDb": {
-  "ConnectionString": "mongodb://localhost:27017",
-  "DatabaseName": "MapAppDb"
-}
+```bash
+cp server/src/MapApp.Api/.env.example server/src/MapApp.Api/.env
 ```
 
-Adjust the connection string to match your container's port / credentials
-(e.g. `mongodb://user:pass@localhost:27017/?authSource=admin`).
+```ini
+MongoDb__ConnectionString=mongodb://user:pass@localhost:27017
+# MongoDb__DatabaseName=MapAppDb   (optional, default from appsettings.json)
+```
+
+The API loads `.env` at startup into environment variables (`Section__Key` = `Section:Key`), so these
+values override `appsettings.json`. Real environment variables with the same names win over the file.
+If the connection string is missing, the API refuses to start and says so.
 
 The client calls `/api` on its own origin; in development Vite proxies it to `API_PROXY_TARGET`
 (`client/.env`, default `http://localhost:5110`). CORS for `http://localhost:5173` is also allowed
@@ -96,7 +100,7 @@ Collection `mapObjects` (2dsphere index on `location`):
 
 ```
 server/
-  src/MapApp.Api/   Controllers, Dtos, Mapping, Middleware, Program.cs, appsettings.json
+  src/MapApp.Api/   Controllers, Dtos, Mapping, Middleware, Program.cs, appsettings.json, .env.example
   src/MapApp.BLL/   Interfaces, Services, Models, Validation, Mapping, Exceptions
   src/MapApp.DAL/   Configuration, Context, Entities, Interfaces, Repositories, Indexes
   tests/MapApp.Tests/
