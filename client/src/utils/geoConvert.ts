@@ -44,4 +44,18 @@ export function centroid(ring: Position[]): Position {
   return [cx / (3 * area), cy / (3 * area)]
 }
 
+// Keyed by ring reference: rings are immutable (RTK Query results and Immer state), so a ring
+// only gets a new reference when the polygon changes. WeakMap entries go away with the ring.
+const centroidCache = new WeakMap<Position[], Position>()
+
+/** `centroid()` memoized per ring, so re-renders don't recompute it for unchanged polygons. */
+export function cachedCentroid(ring: Position[]): Position {
+  let result = centroidCache.get(ring)
+  if (!result) {
+    result = centroid(ring)
+    centroidCache.set(ring, result)
+  }
+  return result
+}
+
 export const formatCoord = (value: number) => value.toFixed(6)
